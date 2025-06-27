@@ -3,7 +3,8 @@ import { Upload, Database, Zap, AlertTriangle, CheckCircle, FileText, Activity, 
 import { SignalType, UploadData } from '../types';
 import { apiService } from '../utils/api';
 
-const N8N_WEBHOOK_URL = 'https://forzio.app.n8n.cloud/webhook-test/panpath'; // Replace with your actual webhook URL
+const N8N_WEBHOOK_URL1 = 'https://forzio.app.n8n.cloud/webhook-test/panpath'; // Replace with your actual webhook URL
+const N8N_WEBHOOK_URL2 = 'https://forzio.app.n8n.cloud/webhook-test/p2';
 
 const Admin: React.FC = () => {
   const [uploadType, setUploadType] = useState<'csv' | 'json'>('json');
@@ -53,7 +54,7 @@ const Admin: React.FC = () => {
 
       // Send to n8n webhook
       try {
-        await fetch(N8N_WEBHOOK_URL, {
+        await fetch(N8N_WEBHOOK_URL1, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ const Admin: React.FC = () => {
 
       // Send to n8n webhook
       try {
-        await fetch(N8N_WEBHOOK_URL, {
+        await fetch(N8N_WEBHOOK_URL2, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

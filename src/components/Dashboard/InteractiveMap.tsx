@@ -1,20 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { MapPin as MapPinIcon, Globe } from 'lucide-react';
-import { MapPin, SignalType } from '../../types';
+import { SignalType } from '../../types';
 import { mockMapPins } from '../../data/mockData';
-import MapboxMap from './MapboxMap';
 
 interface InteractiveMapProps {
   activeFilters: SignalType[];
 }
 
 const InteractiveMap: React.FC<InteractiveMapProps> = ({ activeFilters }) => {
-  const [useMapbox, setUseMapbox] = useState(false);
   const [hoveredPin, setHoveredPin] = useState<string | null>(null);
-
-  // Check if Mapbox token is available
-  const hasMapboxToken = import.meta.env.VITE_MAPBOX_TOKEN && 
-    import.meta.env.VITE_MAPBOX_TOKEN !== 'your-mapbox-token-here';
 
   const filteredPins = useMemo(() => {
     return mockMapPins.filter(pin => {
@@ -23,12 +17,13 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ activeFilters }) => {
     });
   }, [activeFilters]);
 
-  const getRiskColor = (level: 'low' | 'medium' | 'high') => {
+  const getRiskColor = (level: 'low' | 'medium' | 'high' | 'critical') => {
     switch (level) {
-      case 'low': return '#C3E8BD';
-      case 'medium': return '#F9E79F';
-      case 'high': return '#F5B7B1';
-      default: return '#E5E7EB';
+      case 'low': return '#10B981';
+      case 'medium': return '#F59E0B';
+      case 'high': return '#EF4444';
+      case 'critical': return '#DC2626';
+      default: return '#6B7280';
     }
   };
 
@@ -57,45 +52,16 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ activeFilters }) => {
     return { x, y };
   };
 
-  // If Mapbox is available and selected, use it
-  if (hasMapboxToken && useMapbox) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Globe className="w-6 h-6 text-accent" />
-            <h3 className="text-lg font-semibold text-textPrimary">Interactive World Map</h3>
-          </div>
-          <button
-            onClick={() => setUseMapbox(false)}
-            className="text-sm text-accent hover:text-primary transition-colors duration-200 font-medium"
-          >
-            Switch to Fallback View
-          </button>
-        </div>
-        <MapboxMap activeFilters={activeFilters} />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <Globe className="w-6 h-6 text-accent" />
-          <h3 className="text-lg font-semibold text-textPrimary">Global Surveillance Map</h3>
+          <Globe className="w-6 h-6 text-primary" />
+          <h3 className="text-lg font-semibold text-text-primary">Global Surveillance Map</h3>
         </div>
-        {hasMapboxToken && (
-          <button
-            onClick={() => setUseMapbox(true)}
-            className="text-sm text-accent hover:text-primary transition-colors duration-200 font-medium"
-          >
-            Switch to Interactive Map
-          </button>
-        )}
       </div>
 
-      <div className="relative bg-gradient-to-br from-primary via-navy-800 to-accent rounded-xl overflow-hidden shadow-lg">
+      <div className="relative bg-gradient-to-br from-primary-dark via-primary to-primary rounded-lg overflow-hidden shadow-card">
         <div className="absolute inset-0 opacity-10">
           <div className="w-full h-full" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -145,15 +111,15 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ activeFilters }) => {
             
             return (
               <g key={pin.id}>
-                {/* Pulse animation for high risk */}
-                {pin.riskLevel === 'high' && (
+                {/* Pulse animation for high/critical risk */}
+                {(pin.riskLevel === 'high' || pin.riskLevel === 'critical') && (
                   <circle
                     cx={coords.x}
                     cy={coords.y}
                     r="20"
                     fill={getRiskColor(pin.riskLevel)}
                     opacity="0.3"
-                    className="animate-pulse"
+                    className="animate-pulse-ring"
                   />
                 )}
                 
@@ -198,7 +164,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ activeFilters }) => {
                       {pin.location}
                     </text>
                     
-                    <text x={coords.x + 35} y={coords.y - 15} fill="#00BFA6" fontSize="11" fontWeight="600">
+                    <text x={coords.x + 35} y={coords.y - 15} fill="#00C7B7" fontSize="11" fontWeight="600">
                       {pin.signalCount} signals • {pin.riskLevel} risk
                     </text>
                     
@@ -219,13 +185,14 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ activeFilters }) => {
         </svg>
 
         {/* Enhanced Legend */}
-        <div className="absolute bottom-4 left-4 bg-white bg-opacity-95 rounded-lg p-4 shadow-xl border border-white border-opacity-20">
-          <h4 className="text-sm font-semibold text-textPrimary mb-3 flex items-center space-x-2">
-            <MapPinIcon className="w-4 h-4 text-accent" />
+        <div className="absolute bottom-4 left-4 bg-card-white bg-opacity-95 rounded-lg p-4 shadow-card border border-border">
+          <h4 className="text-sm font-semibold text-text-primary mb-3 flex items-center space-x-2">
+            <MapPinIcon className="w-4 h-4 text-primary" />
             <span>Risk Levels</span>
           </h4>
           <div className="space-y-2">
             {[
+              { level: 'critical', label: 'Critical', count: filteredPins.filter(p => p.riskLevel === 'critical').length },
               { level: 'high', label: 'High Risk', count: filteredPins.filter(p => p.riskLevel === 'high').length },
               { level: 'medium', label: 'Medium Risk', count: filteredPins.filter(p => p.riskLevel === 'medium').length },
               { level: 'low', label: 'Low Risk', count: filteredPins.filter(p => p.riskLevel === 'low').length },
@@ -236,9 +203,9 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ activeFilters }) => {
                     className="w-3 h-3 rounded-full border-2 border-white shadow-sm"
                     style={{ backgroundColor: getRiskColor(item.level as any) }}
                   />
-                  <span className="text-textSecondary font-medium">{item.label}</span>
+                  <span className="text-text-secondary font-medium">{item.label}</span>
                 </div>
-                <span className="text-textPrimary font-semibold">{item.count}</span>
+                <span className="text-text-primary font-semibold">{item.count}</span>
               </div>
             ))}
           </div>
@@ -246,10 +213,10 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ activeFilters }) => {
 
         {/* Active filters indicator */}
         {activeFilters.length > 0 && (
-          <div className="absolute top-4 right-4 bg-white bg-opacity-95 rounded-lg p-3 shadow-xl">
+          <div className="absolute top-4 right-4 bg-card-white bg-opacity-95 rounded-lg p-3 shadow-card">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
-              <span className="text-sm font-semibold text-textPrimary">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+              <span className="text-sm font-semibold text-text-primary">
                 {activeFilters.length} filter{activeFilters.length !== 1 ? 's' : ''} active
               </span>
             </div>
@@ -257,10 +224,10 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ activeFilters }) => {
         )}
 
         {/* System status indicator */}
-        <div className="absolute top-4 left-4 bg-white bg-opacity-95 rounded-lg p-3 shadow-xl">
+        <div className="absolute top-4 left-4 bg-card-white bg-opacity-95 rounded-lg p-3 shadow-card">
           <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-xs font-medium text-textSecondary">
+            <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+            <span className="text-xs font-medium text-text-secondary">
               Live Monitoring • {filteredPins.length} locations
             </span>
           </div>

@@ -1,25 +1,30 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import ClinicalLayout from './components/Layout/ClinicalLayout';
+import { AuthProvider } from './contexts/AuthContext';
+import Layout from './components/Layout/Layout';
 import Home from './pages/Home';
-import ClinicalDashboard from './pages/ClinicalDashboard';
-import EventDetail from './pages/EventDetail';
-import Alerts from './pages/Alerts';
-import Admin from './pages/Admin';
+import Dashboard from './pages/Dashboard';
+import LoginPage from './components/Auth/LoginPage';
+import SignupPage from './components/Auth/SignupPage';
+import SurveyPage from './components/Auth/SurveyPage';
+import AIAssistant from './components/Chat/AIAssistant';
 
 function App() {
   return (
-    <Router>
-      <ClinicalLayout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<ClinicalDashboard />} />
-          <Route path="/event/:eventId" element={<EventDetail />} />
-          <Route path="/alerts" element={<Alerts />} />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
-      </ClinicalLayout>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/survey" element={<SurveyPage />} />
+          </Routes>
+          <AIAssistant />
+        </Layout>
+      </Router>
+    </AuthProvider>
   );
 }
 
